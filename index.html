@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fish! Personality Test</title>
+  <style>
+    :root {
+      --ocean-dark: #063247;
+      --ocean-mid: #0b6f8f;
+      --ocean-light: #e6fbff;
+      --coral: #ff7f6e;
+      --sand: #fff3d6;
+      --white: #ffffff;
+      --text: #12303a;
+      --muted: #55737d;
+      --shadow: 0 12px 30px rgba(6, 50, 71, 0.18);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.8) 0 2px, transparent 3px),
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,0.5) 0 3px, transparent 4px),
+        linear-gradient(180deg, #c9f6ff 0%, #75d4e9 40%, #0b6f8f 100%);
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .wrapper { max-width: 980px; margin: 0 auto; }
+
+    .hero {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 34px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.22;
+      background: var(--ocean-mid);
+    }
+
+    .hero::before { width: 160px; height: 160px; left: -60px; top: -60px; }
+    .hero::after { width: 220px; height: 220px; right: -90px; bottom: -120px; }
+
+    h1 {
+      font-size: clamp(30px, 4vw, 48px);
+      margin: 0 0 12px;
+      color: var(--ocean-dark);
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 0 auto 18px;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .badge {
+      background: var(--sand);
+      border: 1px solid rgba(6, 50, 71, 0.12);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .story-card,
+    .question-card,
+    .result-card {
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-top: 22px;
+      padding: 28px;
+    }
+
+    .story-card {
+      border-left: 8px solid var(--coral);
+      line-height: 1.65;
+      font-size: 17px;
+    }
+
+    .question-card h2 {
+      margin: 0 0 8px;
+      color: var(--ocean-dark);
+      font-size: 22px;
+    }
+
+    .question-text {
+      font-size: 17px;
+      line-height: 1.55;
+      margin: 0 0 18px;
+    }
+
+    .options { display: grid; gap: 12px; }
+
+    label.option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px 16px;
+      border: 2px solid #d8edf2;
+      border-radius: 16px;
+      background: #fbfeff;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    label.option:hover {
+      transform: translateY(-2px);
+      border-color: var(--ocean-mid);
+      background: #f0fbff;
+    }
+
+    label.option input {
+      margin-top: 3px;
+      transform: scale(1.15);
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 28px 0 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-2px); }
+
+    .primary { background: var(--ocean-dark); color: var(--white); }
+    .secondary {
+      background: var(--sand);
+      color: var(--ocean-dark);
+      border: 1px solid rgba(6, 50, 71, 0.14);
+    }
+
+    .error {
+      display: none;
+      background: #fff0ef;
+      border: 1px solid #ffc4bd;
+      color: #8a271d;
+      padding: 14px 16px;
+      border-radius: 14px;
+      margin-top: 18px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .result-card {
+      display: none;
+      text-align: center;
+      border-top: 10px solid var(--coral);
+    }
+
+    .creature { font-size: 78px; margin: 10px 0; }
+
+    .result-card h2 {
+      margin: 0;
+      color: var(--ocean-dark);
+      font-size: clamp(28px, 4vw, 42px);
+    }
+
+    .principle {
+      display: inline-block;
+      margin: 14px 0;
+      padding: 10px 16px;
+      background: var(--sand);
+      border-radius: 999px;
+      font-weight: 900;
+      color: var(--ocean-dark);
+    }
+
+    .result-desc {
+      max-width: 760px;
+      margin: 12px auto 0;
+      font-size: 18px;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    .score-table {
+      max-width: 720px;
+      margin: 24px auto 0;
+      display: grid;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .score-row {
+      background: #f5fbfd;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 700;
+    }
+
+    .manual-note {
+      margin-top: 18px;
+      padding: 16px;
+      background: #f5fbfd;
+      border-radius: 16px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: rgba(255,255,255,0.95);
+      margin-top: 22px;
+      font-size: 14px;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .hero, .story-card, .question-card, .result-card { box-shadow: none; border: 1px solid #ddd; }
+      .buttons { display: none; }
+      .footer-note { color: #555; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrapper">
+    <section class="hero">
+      <h1>What’s Your Fish! Personality?</h1>
+      <p class="subtitle">
+        Follow Bubbles the Blue Tang on a very eventful first day at work. Choose what you would most likely do, and discover which Fish! Principle reflects you best.
+      </p>
+      <div class="badge-row">
+        <span class="badge">🐢 Be There — Sea Turtle</span>
+        <span class="badge">🐬 Make Their Day — Dolphin</span>
+        <span class="badge">🦈 Choose Your Attitude — Shark</span>
+        <span class="badge">🐠 Play — Clownfish</span>
+      </div>
+    </section>
+
+    <section class="story-card">
+      <strong>Story time:</strong> Bubbles the Blue Tang has just joined <strong>Deep Central Sea Ltd (DCS)</strong>. It is only 8.31am and Bubbles has already swum into the wrong meeting room, waved at a poster thinking it was a colleague, and accidentally replied “Thanks, you too!” when the coffee machine beeped. A true first-day icon.
+      <br><br>
+      Help Bubbles survive the day by choosing what you would do in each situation. There are no wrong answers — only different types of workplace sea-creature energy.
+    </section>
+
+    <form id="quizForm">
+      <section class="question-card">
+        <h2>Question 1</h2>
+        <p class="question-text">Bubbles reaches the reception reef and sees another new colleague looking more lost than a prawn at a karaoke contest. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q1" value="turtle"> <span>A. Stay beside them, reassure them, and help them find where to go.</span></label>
+          <label class="option"><input type="radio" name="q1" value="clownfish"> <span>B. Make them laugh and say, “Good news, at least we are lost together!”</span></label>
+          <label class="option"><input type="radio" name="q1" value="shark"> <span>C. Confidently lead the way, even if you need to figure it out as you go.</span></label>
+          <label class="option"><input type="radio" name="q1" value="dolphin"> <span>D. Compliment their first-day outfit and help them feel welcomed.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 2</h2>
+        <p class="question-text">During orientation, Bubbles’ name tag says “Bubblesss” with three S. The trainer asks if everything is correct. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q2" value="turtle"> <span>A. Politely point it out and stay calm. Mistakes happen.</span></label>
+          <label class="option"><input type="radio" name="q2" value="clownfish"> <span>B. Say, “Actually, today I am Bubblesss, mysterious cousin of Bubbles.”</span></label>
+          <label class="option"><input type="radio" name="q2" value="shark"> <span>C. Ask for it to be corrected quickly so the day can continue smoothly.</span></label>
+          <label class="option"><input type="radio" name="q2" value="dolphin"> <span>D. Thank the trainer warmly for helping to fix it.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 3</h2>
+        <p class="question-text">Bubbles is given a long staff handbook that looks thicker than a whale’s diary. What is your first move?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q3" value="turtle"> <span>A. Read carefully and note down questions so you can understand properly.</span></label>
+          <label class="option"><input type="radio" name="q3" value="clownfish"> <span>B. Create funny section titles in your notes to make it less dry.</span></label>
+          <label class="option"><input type="radio" name="q3" value="shark"> <span>C. Scan for the key rules and action items first.</span></label>
+          <label class="option"><input type="radio" name="q3" value="dolphin"> <span>D. Share useful tips with another new joiner once you understand them.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 4</h2>
+        <p class="question-text">At lunch, Bubbles sits with a group of colleagues but the table goes quiet. Even the seaweed is uncomfortable. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q4" value="turtle"> <span>A. Ask gentle questions and listen so everyone feels included.</span></label>
+          <label class="option"><input type="radio" name="q4" value="clownfish"> <span>B. Start a light-hearted conversation, like “What is your spirit snack?”</span></label>
+          <label class="option"><input type="radio" name="q4" value="shark"> <span>C. Take the lead and suggest everyone introduce themselves.</span></label>
+          <label class="option"><input type="radio" name="q4" value="dolphin"> <span>D. Notice someone’s lunch looks good and give a cheerful compliment.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 5</h2>
+        <p class="question-text">Bubbles accidentally enters a meeting 10 minutes early and everyone looks very serious. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q5" value="turtle"> <span>A. Sit quietly, observe, and be fully present.</span></label>
+          <label class="option"><input type="radio" name="q5" value="clownfish"> <span>B. Smile and say, “I came early for the premium seats.”</span></label>
+          <label class="option"><input type="radio" name="q5" value="shark"> <span>C. Use the extra time to prepare and understand the agenda.</span></label>
+          <label class="option"><input type="radio" name="q5" value="dolphin"> <span>D. Offer to help set up or pass around materials.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 6</h2>
+        <p class="question-text">A colleague seems stressed because their printer refuses to cooperate. It is making noises like an angry crab. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q6" value="turtle"> <span>A. Stay with them and ask how you can support.</span></label>
+          <label class="option"><input type="radio" name="q6" value="clownfish"> <span>B. Name the printer “Sir Jam-a-Lot” to lighten the mood.</span></label>
+          <label class="option"><input type="radio" name="q6" value="shark"> <span>C. Troubleshoot quickly or find someone who can fix it.</span></label>
+          <label class="option"><input type="radio" name="q6" value="dolphin"> <span>D. Bring them a drink or help print from another machine.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 7</h2>
+        <p class="question-text">Bubbles receives feedback on the first task of the day. Some parts went well, some parts need improvement. What feels most like you?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q7" value="turtle"> <span>A. Listen carefully and reflect before responding.</span></label>
+          <label class="option"><input type="radio" name="q7" value="clownfish"> <span>B. Keep the mood light while learning from it.</span></label>
+          <label class="option"><input type="radio" name="q7" value="shark"> <span>C. Take it positively and plan how to improve immediately.</span></label>
+          <label class="option"><input type="radio" name="q7" value="dolphin"> <span>D. Thank the person sincerely for taking time to guide you.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 8</h2>
+        <p class="question-text">The team needs a volunteer for a small activity at the next staff gathering. Bubbles looks around and sees many sudden “busy with email” faces. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q8" value="turtle"> <span>A. Volunteer if it helps the team and support others quietly.</span></label>
+          <label class="option"><input type="radio" name="q8" value="clownfish"> <span>B. Volunteer, especially if there is room to make it fun.</span></label>
+          <label class="option"><input type="radio" name="q8" value="shark"> <span>C. Step up and get things moving.</span></label>
+          <label class="option"><input type="radio" name="q8" value="dolphin"> <span>D. Encourage someone else and offer to help them shine.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 9</h2>
+        <p class="question-text">Near the end of the day, Bubbles realises they forgot one colleague’s name. Panic bubbles appear. What do you do?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q9" value="turtle"> <span>A. Be honest and ask again respectfully.</span></label>
+          <label class="option"><input type="radio" name="q9" value="clownfish"> <span>B. Say, “My brain has become soup. Please save me — your name again?”</span></label>
+          <label class="option"><input type="radio" name="q9" value="shark"> <span>C. Check the org chart or email signature and move on.</span></label>
+          <label class="option"><input type="radio" name="q9" value="dolphin"> <span>D. Apologise warmly and make a point to remember next time.</span></label>
+        </div>
+      </section>
+
+      <section class="question-card">
+        <h2>Question 10</h2>
+        <p class="question-text">After helping Bubbles survive the first day at Deep Central Sea Ltd (DCS), Bubbles turns to you and asks, “So… how are YOU feeling after all this?” How do you reply?</p>
+        <div class="options">
+          <label class="option"><input type="radio" name="q10" value="turtle"> <span>A. Tired… but happy I could help Bubbles through the day.</span></label>
+          <label class="option"><input type="radio" name="q10" value="clownfish"> <span>B. Honestly? I am emotionally attached to Bubbles now. We have been through a lot together.</span></label>
+          <label class="option"><input type="radio" name="q10" value="shark"> <span>C. Feeling good. We handled the situation and made it through successfully.</span></label>
+          <label class="option"><input type="radio" name="q10" value="dolphin"> <span>D. Happy! I hope Bubbles feels welcomed and has a great journey ahead.</span></label>
+        </div>
+      </section>
+    </form>
+
+    <div class="buttons">
+      <button type="button" class="primary" onclick="calculateResult()">Reveal My Fish! Personality</button>
+      <button type="button" class="secondary" onclick="resetQuiz()">Reset Quiz</button>
+    </div>
+
+    <div id="error" class="error">Oops! Please answer all questions before revealing your result. Even Bubbles needs full data before swimming dramatically away.</div>
+
+    <section id="result" class="result-card">
+      <div id="resultEmoji" class="creature"></div>
+      <h2 id="resultTitle"></h2>
+      <div id="resultPrinciple" class="principle"></div>
+      <p id="resultDescription" class="result-desc"></p>
+      <div id="scoreTable" class="score-table"></div>
+      <div class="manual-note">
+        <strong>Manual backup:</strong> If the result button does not work on your intranet, count your answers manually. Highest score wins: Sea Turtle = Be There, Dolphin = Make Their Day, Shark = Choose Your Attitude, Clownfish = Play.
+      </div>
+    </section>
+
+    <p class="footer-note">Fish! Personality Test | Connection • Appreciation • Shared Moments</p>
+  </main>
+
+  <script>
+    function calculateResult() {
+      var scores = { turtle: 0, dolphin: 0, shark: 0, clownfish: 0 };
+      var totalQuestions = 10;
+      var error = document.getElementById("error");
+      var result = document.getElementById("result");
+
+      for (var i = 1; i <= totalQuestions; i++) {
+        var selected = document.querySelector('input[name="q' + i + '"]:checked');
+        if (!selected) {
+          error.style.display = "block";
+          result.style.display = "none";
+          error.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        scores[selected.value]++;
+      }
+
+      error.style.display = "none";
+
+      var winningType = "turtle";
+      var order = ["turtle", "dolphin", "shark", "clownfish"];
+      for (var j = 0; j < order.length; j++) {
+        if (scores[order[j]] > scores[winningType]) {
+          winningType = order[j];
+        }
+      }
+
+      var results = {
+        turtle: {
+          emoji: "🐢",
+          title: "You are a Sea Turtle!",
+          principle: "Fish! Principle: Be There",
+          description: "You are steady, thoughtful and present. Like a Sea Turtle, you bring calm support to the people around you. You notice when someone needs help, you listen well, and you make others feel grounded. Your Fish! energy reminds the team that sometimes the best gift is simply being fully there."
+        },
+        dolphin: {
+          emoji: "🐬",
+          title: "You are a Dolphin!",
+          principle: "Fish! Principle: Make Their Day",
+          description: "You are warm, encouraging and people-focused. Like a Dolphin, you know how to lift someone’s mood through small but meaningful actions. A kind word, a thoughtful gesture, or a cheerful check-in from you can turn an ordinary workday into a much brighter one."
+        },
+        shark: {
+          emoji: "🦈",
+          title: "You are a Shark!",
+          principle: "Fish! Principle: Choose Your Attitude",
+          description: "You are bold, driven and action-oriented. Like a Shark, you move forward with confidence and choose your attitude even when things get challenging. You bring momentum to the team and remind others that while we cannot control every wave, we can choose how we swim through it."
+        },
+        clownfish: {
+          emoji: "🐠",
+          title: "You are a Clownfish!",
+          principle: "Fish! Principle: Play",
+          description: "You are fun, expressive and full of positive energy. Like a Clownfish, you help people loosen up, laugh and enjoy the moment. You bring playfulness into the workplace in a way that builds connection, creativity and shared memories. Work feels lighter when you are around."
+        }
+      };
+
+      document.getElementById("resultEmoji").textContent = results[winningType].emoji;
+      document.getElementById("resultTitle").textContent = results[winningType].title;
+      document.getElementById("resultPrinciple").textContent = results[winningType].principle;
+      document.getElementById("resultDescription").textContent = results[winningType].description;
+
+      document.getElementById("scoreTable").innerHTML =
+        '<div class="score-row"><span>🐢 Sea Turtle — Be There</span><span>' + scores.turtle + '</span></div>' +
+        '<div class="score-row"><span>🐬 Dolphin — Make Their Day</span><span>' + scores.dolphin + '</span></div>' +
+        '<div class="score-row"><span>🦈 Shark — Choose Your Attitude</span><span>' + scores.shark + '</span></div>' +
+        '<div class="score-row"><span>🐠 Clownfish — Play</span><span>' + scores.clownfish + '</span></div>';
+
+      result.style.display = "block";
+      result.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function resetQuiz() {
+      document.getElementById("quizForm").reset();
+      document.getElementById("error").style.display = "none";
+      document.getElementById("result").style.display = "none";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  </script>
+</body>
+</html>
+
+
+
